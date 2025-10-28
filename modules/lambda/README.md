@@ -1,59 +1,63 @@
-# AWS Lambda Module
+# AWS Lambda Wrapper
 
-Modulo generico para desplegar funciones AWS Lambda empaquetadas como archivos ZIP, con soporte para publicar versiones, administrar variables de entorno y crear el grupo de logs administrado opcionalmente.
+Modulo de conveniencia para consumir el modulo publico [`terraform-aws-modules/lambda/aws`](https://github.com/terraform-aws-modules/terraform-aws-lambda) manteniendo los mismos nombres de variables que el recurso original y agregando opinionated defaults para logs y Powertools.
 
 ## Caracteristicas
-- Configuracion de runtime, memoria, timeout y versionado (`publish`).
-- Calcula el `source_code_hash` automaticamente si no se proporciona.
-- Crea y protege un `aws_cloudwatch_log_group` cuando se requiere.
-- Expone ARN, nombre y version mas reciente como salidas.
+- Utiliza `terraform-aws-modules/lambda/aws` en su version `8.1.2`.
+- Construye automaticamente los nombres (`function_name`, `role_name`, `policy_name`) a partir de `service_name`, `function_name` y `env`.
+- Inyecta variables de entorno para AWS Powertools (`LOG_LEVEL`, `POWERTOOLS_*`).
+- Define retencion de logs por ambiente (`default`, `staging`, `prod`) y permite personalizarla.
 
 ## Requisitos
 - Terraform >= 1.3.0.
 - Provider AWS >= 4.0.
-- Rol IAM existente con permisos para ejecutar la funcion.
 
 ## Uso basico
 
 ```hcl
 module "lambda_app" {
-  source = "git::ssh://git@github.com/finerio/terraform-registry.git//modules/lambda?ref=v0.1.0"
+  source = "git::ssh://git@github.com/finerio/terraform-registry.git//modules/lambda?ref=v0.x.x"
 
-  function_name = "mi-funcion"
-  handler       = "index.handler"
-  runtime       = "python3.11"
-  role_arn      = aws_iam_role.lambda_exec.arn
-  source_path   = "${path.module}/../artifacts/lambda.zip"
+  env          = var.env
+  service_name = "payments"
+  function_name = "webhook"
+
+  description = "Procesa notificaciones entrantes"
+  handler     = "app.lambda_handler"
+  runtime     = "python3.11"
+  timeout     = 10
+  memory_size = 256
 
   environment_variables = {
-    STAGE = var.environment
+    STAGE = var.env
   }
 }
 ```
 
-> Ajusta `ref` segun la version etiquetada que consumas desde el registro.
+> Ajusta `ref` a la etiqueta que corresponda a la version deseada del registro.
 
 ## Variables principales
 
-- `function_name` (string, requerido): Nombre unico de la funcion Lambda.
-- `handler` (string, requerido): Metodo handler principal del paquete.
-- `runtime` (string, requerido): Runtime soportado por AWS (p.ej. `python3.11`).
-- `role_arn` (string, requerido): ARN del rol IAM asociado.
-- `source_path` (string, requerido): Ruta al archivo ZIP que contiene el codigo.
-- `source_code_hash` (string, opcional): Hash base64 del ZIP para forzar despliegues.
-- `timeout`, `memory_size`, `publish` (opcionales): Parametros de ejecucion.
-- `environment_variables` (map(string), opcional): Variables de entorno.
-- `create_log_group` (bool) y `log_retention_in_days` (number): Gestion de logs.
+- `service_name` y `function_name`: Se combinan con `env` para nombrar recursos derivados.
+- `description`, `handler`, `runtime`, `timeout`, `memory_size`, `architectures`: Se pasan directamente al modulo original.
+- `create_package`, `create_layer`, `local_existing_package`, `layers`: Controlan el origen del codigo y capas.
+- `environment_variables`: Mapa adicional fusionado con las variables Powertools generadas.
+- `cloudwatch_logs_retention_in_days`: Retencion base aplicada al ambiente `default`.
+- `policy_statements`, `event_source_mapping`, `allowed_triggers`: Configuraciones avanzadas heredadas del modulo original.
 
-Consulta `variables.tf` para ver el catalogo completo y valores por defecto.
+Revisa `variables.tf` para ver el catalogo completo, tipos y valores por defecto.
+
+## Extender la configuracion
+
+El wrapper expone los argumentos mas comunes del modulo oficial. Si necesitas un argumento adicional basta con agregarlo en `variables.tf`, mapearlo en `locals.tf` y referenciarlo en `main.tf`. De momento Terraform no permite pasar dinamicamente atributos arbitrarios a un bloque `module`, por lo que los nuevos parametros deben declararse explicitamente.
 
 ## Salidas
 
-- `function_name`: Nombre final de la Lambda.
-- `function_arn`: ARN asignado.
-- `latest_version`: Version publicada mas reciente.
+- `lambda_function_name`
+- `lambda_function_arn`
+- `lambda_role_name`
 
 ## Buenas practicas sugeridas
 - Empaquetar la Lambda con dependencias en un ZIP y versionarlo externamente.
-- Gestionar permisos y politicas del rol IAM desde un modulo dedicado.
+- Gestionar permisos y politicas IAM complementarias desde modulos dedicados.
 - Ejecutar `terraform fmt` y `terraform validate` antes de publicar cambios.

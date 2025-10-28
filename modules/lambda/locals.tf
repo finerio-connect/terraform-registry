@@ -1,24 +1,24 @@
 locals {
   # Core
-  lambda_name                       = "${var.lambda_service_name}-${var.lambda_name}-${var.env}"
-  lambda_description                = var.lambda_description
-  lambda_service_name               = var.lambda_service_name
-  lambda_source_code_package_path   = var.lambda_source_code_package_path
-  lambda_handler                    = var.lambda_handler
-  lambda_create_lambda_function_url = var.lambda_create_lambda_function_url
+  function_name              = "${var.service_name}-${var.function_name}-${var.env}"
+  description                = var.description
+  service_name               = var.service_name
+  local_existing_package     = var.local_existing_package
+  handler                    = var.handler
+  create_lambda_function_url = var.create_lambda_function_url
   # Runtime
-  lambda_runtime                  = var.lambda_runtime_engine
-  lambda_runtime_memory           = var.lambda_runtime_memory
-  lambda_runtime_architecture     = [var.lambda_runtime_architecture]
-  lambda_runtime_timeout          = var.lambda_runtime_timeout
+  runtime       = var.runtime
+  memory_size   = var.memory_size
+  architectures = var.architectures
+  timeout       = var.timeout
   # Source code
-  lambda_create_layer             = var.lambda_create_package
-  lambda_create_package           = var.lambda_create_package
-  lambda_ignore_source_code_hash  = var.lambda_ignore_source_code_hash
+  create_layer            = var.create_layer
+  create_package          = var.create_package
+  ignore_source_code_hash = var.ignore_source_code_hash
   # Logs
-  config_common = {
+  cloudwatch_logs_retention = {
     default = {
-      cloudwatch_logs_retention_in_days = var.lambda_logs_retention_in_days
+      cloudwatch_logs_retention_in_days = var.cloudwatch_logs_retention_in_days
     },
     staging = {
       cloudwatch_logs_retention_in_days = 30
@@ -27,22 +27,22 @@ locals {
       cloudwatch_logs_retention_in_days = 1096
     }
   }
-  lambda_attach_create_log_group_permission = true
-  lambda_use_existing_cloudwatch_log_group  = false
+  attach_create_log_group_permission = true
+  use_existing_cloudwatch_log_group  = false
   environment = {
     variables = merge({
-      LOG_LEVEL                     = var.lambda_log_level
-      POWERTOOLS_LOGGER_SAMPLE_RATE = var.lambda_log_rate
-      POWERTOOLS_LOGGER_LOG_EVENT   = var.lambda_log_event
-      POWERTOOLS_SERVICE_NAME       = var.lambda_service_name
-      POWERTOOLS_PARAMETERS_MAX_AGE = var.lambda_cache_ssm
+      LOG_LEVEL                     = var.log_level
+      POWERTOOLS_LOGGER_SAMPLE_RATE = var.log_sample_rate
+      POWERTOOLS_LOGGER_LOG_EVENT   = var.log_event
+      POWERTOOLS_SERVICE_NAME       = var.service_name
+      POWERTOOLS_PARAMETERS_MAX_AGE = var.parameters_cache_ttl
       },
-      var.lambda_environment_variables
+      var.environment_variables
     )
   }
-  lambda_layers               = var.lambda_layers
-  lambda_policy_statements    = var.lambda_policy_statements
+  layers            = var.layers
+  policy_statements = var.policy_statements
   # events
-  lambda_event_source_mapping = var.lambda_event_source_mapping
-  allowed_triggers            = var.allowed_triggers
+  event_source_mapping = var.event_source_mapping
+  allowed_triggers     = var.allowed_triggers
 }
