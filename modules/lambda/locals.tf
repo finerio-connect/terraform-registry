@@ -27,8 +27,8 @@ locals {
       cloudwatch_logs_retention_in_days = 1096
     }
   }
-  attach_create_log_group_permission = true
-  use_existing_cloudwatch_log_group  = false
+  attach_create_log_group_permission = var.attach_create_log_group_permission
+  use_existing_cloudwatch_log_group  = var.use_existing_cloudwatch_log_group
   environment = {
     variables = merge({
       LOG_LEVEL                     = var.log_level

@@ -44,12 +44,13 @@ module "lambda_app" {
 - `environment_variables`: Mapa adicional fusionado con las variables Powertools generadas.
 - `cloudwatch_logs_retention_in_days`: Retencion base aplicada al ambiente `default`.
 - `policy_statements`, `event_source_mapping`, `allowed_triggers`: Configuraciones avanzadas heredadas del modulo original.
+- Argumentos adicionales como `package_type`, `publish`, `store_on_s3`, `snap_start`, `vpc_*`, `tags`, `timeouts`, `logging_*`, `create_*` y el resto de banderas soportadas por `terraform-aws-modules/lambda/aws` se exponen con los mismos nombres y tipos.
 
 Revisa `variables.tf` para ver el catalogo completo, tipos y valores por defecto.
 
 ## Extender la configuracion
 
-El wrapper expone los argumentos mas comunes del modulo oficial. Si necesitas un argumento adicional basta con agregarlo en `variables.tf`, mapearlo en `locals.tf` y referenciarlo en `main.tf`. De momento Terraform no permite pasar dinamicamente atributos arbitrarios a un bloque `module`, por lo que los nuevos parametros deben declararse explicitamente.
+El wrapper expone practicamente todo el catalogo del modulo oficial. Si versiones futuras agregan nuevos argumentos basta con declararlos en `variables.tf`, mapearlos en `locals.tf` (si se requiere logica extra) y referenciarlos en `main.tf`. Terraform no permite pasar atributos dinamicos a un bloque `module`, por lo que los nuevos parametros deben declararse explicitamente.
 
 ## Salidas
 
