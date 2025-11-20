@@ -1,4 +1,4 @@
-# Lambda Function
+# Lambda Function - Core Outputs
 output "lambda_function_arn" {
   description = "The ARN of the Lambda Function"
   value       = module.lambda_module.lambda_function_arn
@@ -62,11 +62,6 @@ output "lambda_function_signing_job_arn" {
 output "lambda_function_signing_profile_version_arn" {
   description = "ARN of the signing profile version"
   value       = module.lambda_module.lambda_function_signing_profile_version_arn
-}
-
-output "lambda_function_snap_start" {
-  description = "The SnapStart configuration of the Lambda Function"
-  value       = module.lambda_module.lambda_function_snap_start
 }
 
 # Lambda Function URL
@@ -133,13 +128,12 @@ output "lambda_cloudwatch_log_group_name" {
   value       = module.lambda_module.lambda_cloudwatch_log_group_name
 }
 
-# Local File (Package)
+# Package Outputs
 output "local_filename" {
   description = "The filename of zip archive deployed (if deployment was from local)"
   value       = module.lambda_module.local_filename
 }
 
-# S3 Object
 output "s3_object" {
   description = "The map with S3 object data of zip archive deployed (if deployment was from S3)"
   value       = module.lambda_module.s3_object
